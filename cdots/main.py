@@ -51,8 +51,10 @@ else:
 # Include API routers
 from cdots.apis.auth.register import router as register_router
 from cdots.apis.auth.login import router as login_router
+from cdots.apis.member_ops.fetch_similar_members import router as fetch_similar_members_router
 app.include_router(register_router)
 app.include_router(login_router)
+app.include_router(fetch_similar_members_router)
 
 
 @app.post("/upload/", summary="Upload an image and detect relations",
