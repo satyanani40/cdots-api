@@ -1,0 +1,69 @@
+## Python Files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+##  Virtual Environments
+venv/
+.env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+## Dependencies
+*.egg-info/
+*.dist-info/
+build/
+dist/
+site-packages/
+
+## Logs & Debugging
+logs/
+*.log
+*.out
+*.err
+
+## Environment Variables & Secrets
+.env
+.env.local
+.env.production
+config.json
+secrets.json
+
+## Database & Cache
+db.sqlite3
+instance/
+*.db
+*.sqlite
+*.sqlite3
+*.bak
+*.sql
+
+## Documentation & IDE Files
+.vscode/
+.idea/
+*.iml
+*.ipynb_checkpoints
+
+## FastAPI Deployment Artifacts
+*.pid
+*.sock
+gunicorn.log
+gunicorn.error
+
+## Cache & Temporary Files
+.DS_Store
+*.swp
+*.swo
+*.~*
+*.tmp
+
+## Uvicorn & FastAPI Specific
+*.pid
+*.pyc
+
+## Jupyter Notebooks (If used)
+*.ipynb_checkpoints
+
