@@ -15,11 +15,13 @@ else:
 # Security settings
 SECRET_KEY = config.get("secret_key", "your_default_secret_key")
 ALGORITHM = "HS256"
+TOKEN_EXPIRE_DAYS = 7  # Set token expiration days
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # MongoDB settings
 MONGO_URI = config.get("mongo_uri", "mongodb://localhost:27017/")
 MONGO_DB_NAME = config.get("mongo_db_name", "cdots")
+LOGS_FOLDER = config.get("logs_folder", "")
 try:
     STATIC_FOLDER_PATH = config['static_folder']
 except Exception as e:

@@ -12,6 +12,7 @@ from cdots.db.mongo.mongo_connection import MongoDBConnection
 from cdots.core.config import MONGO_URI, MONGO_DB_NAME
 from cdots.core.config import STATIC_FOLDER_PATH
 from cdots.core.face_analysis import FaceAppSingleton  #
+from cdots.core.utils import get_unique_mongo_id
 
 
 router = APIRouter(prefix="/api/v1", tags=["User Authentication"])
@@ -37,7 +38,7 @@ class UserRegister(BaseModel):
     profile_pic: UploadFile = File(None)
 
 
-@router.post("/register/")
+@router.post("/register")
 async def register_user(
         full_name: str = Form(...),
         email: EmailStr = Form(...),
@@ -74,7 +75,8 @@ async def register_user(
         "full_name": full_name,
         "email": email,
         "password": pwd_context.hash(password),
-        "profile_pic": profile_pic_path
+        "profile_pic": profile_pic_path,
+        "_id": get_unique_mongo_id()
     }
     inserted_user = db.users.insert_one(user_data)
 

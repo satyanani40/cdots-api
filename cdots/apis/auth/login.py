@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Form
 import jwt
 import datetime
 from pydantic import BaseModel, EmailStr
-from cdots.core.config import SECRET_KEY, ALGORITHM, pwd_context
+from cdots.core.config import SECRET_KEY, ALGORITHM, pwd_context, TOKEN_EXPIRE_DAYS
 from cdots.db.mongo.mongo_connection import MongoDBConnection
 
 router = APIRouter(prefix="/api/v1", tags=["User Authentication"])
@@ -16,11 +16,12 @@ def create_access_token(email, user_id):
     payload = {
         "sub": email,
         "user_id": str(user_id),
-        "iat": datetime.datetime.utcnow()
+        "iat": datetime.datetime.utcnow(),
+        "exp": datetime.datetime.utcnow() + datetime.timedelta(days=TOKEN_EXPIRE_DAYS)  # Token expiration
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
-### **1️⃣ Pydantic Schema for Swagger**
+### **1 Pydantic Schema for Swagger**
 class LoginResponse(BaseModel):
     message: str
     user_id: str
@@ -28,9 +29,10 @@ class LoginResponse(BaseModel):
     full_name: str
     profile_pic: str | None
     access_token: str
+    token_type: str
 
-### **2️⃣ Login Endpoint with Swagger Docs**
-@router.post("/login/", response_model=LoginResponse, summary="User Login", description="Authenticate user and return JWT token.")
+### **2 Login Endpoint with Swagger Docs**
+@router.post("/login", response_model=LoginResponse, summary="User Login", description="Authenticate user and return JWT token.")
 async def login_user(
     email: EmailStr = Form(..., description="User's email address"),
     password: str = Form(..., description="User's password")
@@ -53,5 +55,6 @@ async def login_user(
         "email": user["email"],
         "full_name": user["full_name"],
         "profile_pic": user.get("profile_pic", None),
-        "access_token": token
+        "access_token": token,
+        "token_type": "bearer"
     }

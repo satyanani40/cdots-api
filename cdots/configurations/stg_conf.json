@@ -1,5 +1,6 @@
 {
     "mongo_uri": "mongodb://localhost:27017/",
     "mongo_db_name": "cdots",
-    "static_folder": "/mnt/git/cdots/media"
+    "static_folder": "/mnt/git/cdots/media",
+    "logs_folder": "/mnt/git/cdots/logs"
 }

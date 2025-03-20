@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.openapi.models import Response as OpenAPIResponse
 from fastapi.responses import JSONResponse
+from fastapi.openapi.utils import get_openapi
 from pymongo import MongoClient
 import cv2
 import json
@@ -10,8 +11,17 @@ import urllib
 from insightface.app import FaceAnalysis
 from numpy.linalg import norm
 from typing import List
+from fastapi.openapi.models import SecuritySchemeType
+from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
 
-from cdots.db.mongo.mongo_connection import MongoDBConnection
+
+from cdots.core.logging_config import get_logger
+
+logger = get_logger()
+
+#  Configure OAuth2 with Bearer Token (Fix Swagger UI)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/login")
 
 
 # Create FastAPI app
@@ -40,6 +50,48 @@ os.makedirs("data", exist_ok=True)
 face_app = FaceAnalysis(name="buffalo_l", providers=['CPUExecutionProvider'])
 face_app.prepare(ctx_id=0)
 
+# Enable CORS if needed
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+
+#  Custom OpenAPI function to register OAuth2 in Swagger UI
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+
+    openapi_schema["components"]["securitySchemes"] = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+            "description": "Enter 'Bearer <your_token>'"
+        }
+    }
+
+    for path in openapi_schema["paths"]:
+        for method in openapi_schema["paths"][path]:
+            openapi_schema["paths"][path][method]["security"] = [{"BearerAuth": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+
+app.openapi = custom_openapi
+
 # Load existing embeddings
 if os.path.exists(DATA_FILE):
     with open(DATA_FILE, "r") as f:
@@ -47,13 +99,26 @@ if os.path.exists(DATA_FILE):
 else:
     embeddings_data = []
 
+@app.on_event("startup")
+async def startup_event():
+    logger.info("CDOTS Family Tree API has started!")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    logger.info("CDOTS Family Tree API is shutting down!")
+
 
 # Include API routers
 from cdots.apis.auth.register import router as register_router
 from cdots.apis.auth.login import router as login_router
-from cdots.apis.member_ops.fetch_similar_members import router as fetch_similar_members_router
+from cdots.apis.cdots_ops.fetch_similar_members import router as fetch_similar_members_router
+from cdots.apis.cdots_ops.family_tree import router as family_tree_route
+from cdots.apis.cdots_ops.relationships import router as relationship_route
+
 app.include_router(register_router)
 app.include_router(login_router)
+app.include_router(family_tree_route)
+app.include_router(relationship_route)
 app.include_router(fetch_similar_members_router)
 
 

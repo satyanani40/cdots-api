@@ -8,3 +8,7 @@ mongod --bind_ip 0.0.0.0 --dbpath /data/db --logpath /var/log/mongodb/mongod.log
 
 
 uvicorn runner:app --host 0.0.0.0 --port 8000 --reload
+
+
+schema diagram
+----------------------
