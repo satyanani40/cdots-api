@@ -114,12 +114,14 @@ from cdots.apis.auth.login import router as login_router
 from cdots.apis.cdots_ops.fetch_similar_members import router as fetch_similar_members_router
 from cdots.apis.cdots_ops.family_tree import router as family_tree_route
 from cdots.apis.cdots_ops.relationships import router as relationship_route
+from cdots.apis.auth.me import router as user_profile_router
 
 app.include_router(register_router)
 app.include_router(login_router)
 app.include_router(family_tree_route)
 app.include_router(relationship_route)
 app.include_router(fetch_similar_members_router)
+app.include_router(user_profile_router)
 
 
 @app.post("/upload/", summary="Upload an image and detect relations",
